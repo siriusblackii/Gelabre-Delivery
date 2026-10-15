@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#a83f62">
+  <title>Painel de pedidos | Gelabrê</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#30242a;background:#fff8fa;font-synthesis:none}
+    *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 15px;background:#a83f62;color:#fff;font-weight:750;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+    header{background:#a83f62;color:white;padding:20px max(20px,calc((100% - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    header h1{font-size:22px;margin:0}header p{margin:4px 0 0;color:#fff0f4;font-size:13px}.header-actions{display:flex;gap:8px}.header-actions button,.header-actions a{background:#f6c3d2;color:#56283a}.header-actions a{display:inline-flex;align-items:center;padding:9px 13px;border-radius:10px;text-decoration:none;font-weight:750}
+    main{max-width:1320px;margin:28px auto;padding:0 20px 50px}.panel{background:white;border:1px solid #eee1e6;border-radius:18px;padding:22px;box-shadow:0 5px 22px #7830490a}
+    #login-panel{max-width:440px;margin:8vh auto}.panel h2{margin:0 0 16px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:13px;font-weight:750}.field input,.field select,.toolbar select{border:1px solid #eee1e6;border-radius:10px;padding:11px;background:#fff;width:100%}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.toolbar h2{margin:0}.toolbar select{width:auto;min-width:190px}
+    .error{color:#9c3022;background:#fff0ed;border-radius:10px;padding:11px 13px;margin:12px 0;font-size:14px}.error:empty{display:none}.note{color:#74666c;font-size:13px;line-height:1.5}
+    .orders{display:grid;gap:20px}.order-day{display:grid;gap:12px}.order-day-title{margin:0;padding-bottom:8px;border-bottom:2px solid #f3dce4;color:#783049;font-size:18px;text-transform:capitalize}.order{border:1px solid #eee1e6;border-radius:15px;padding:18px}.order-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.order-head h3{margin:0;font-size:17px}.order-head p{margin:5px 0;color:#74666c;font-size:13px}.status-row{display:flex;align-items:center;gap:8px}.status-row select{padding:8px;border:1px solid #eee1e6;border-radius:9px;background:white}.order-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.order-info p{margin:5px 0;overflow-wrap:anywhere}.order-items{padding-left:20px;margin:8px 0}.total{font-size:18px;font-weight:850;color:#a83f62}.empty{padding:28px;background:#fcf7f9;border-radius:12px;text-align:center;color:#74666c}
+    .admin-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.admin-form .full{grid-column:1/-1}    .admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.admin-actions .secondary,.product-actions .secondary{background:#fff;border:1px solid #eee1e6;color:#30242a}.admin-actions .danger,.product-actions .danger{background:#ffe8e4;color:#9c3022}.product-list{display:grid;gap:8px}.product-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid #eee1e6;border-radius:12px}.product-info{min-width:0}.product-info strong,.product-info small{display:block;overflow-wrap:anywhere}.product-info small{margin-top:3px;color:#74666c}.product-actions{display:flex;gap:7px;flex:none}.product-actions button{padding:9px 11px}.inline{display:flex;align-items:center;gap:8px}.inline input{width:auto}
+    .opening-hours-list{display:grid;gap:8px;margin:16px 0}.opening-hour-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(130px,180px) minmax(130px,180px);align-items:center;gap:12px;padding:10px 12px;border:1px solid #eee1e6;border-radius:10px}.opening-day{display:flex;align-items:center;gap:8px}.opening-day input{width:auto}.opening-time{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:7px;font-size:13px}.opening-time input{min-width:0;width:100%;padding:8px}
+    .admin-shell{display:grid;grid-template-columns:230px minmax(0,1fr);align-items:start;gap:20px}.admin-sidebar{position:sticky;top:18px;display:grid;gap:7px;padding:14px;background:#fff;border:1px solid #eee1e6;border-radius:16px;box-shadow:0 5px 22px #7830490a}.admin-sidebar-title{margin:2px 9px 8px;color:#74666c;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase}.admin-tab{width:100%;display:flex;align-items:center;gap:10px;padding:12px;text-align:left;background:transparent;color:#563b46}.admin-tab:hover{background:#fff3f6;box-shadow:none;transform:none}.admin-tab[aria-selected="true"]{background:#a83f62;color:#fff;box-shadow:0 5px 14px #78304920}.admin-tab-icon{width:24px;text-align:center;font-size:17px}.admin-content{min-width:0}.admin-page-title{margin:0 0 16px;font-size:25px}.admin-section{display:grid;gap:18px}.admin-section>.panel{min-width:0}.admin-content .admin-layout{margin-top:0}
+    @media(max-width:760px){.admin-shell{grid-template-columns:1fr;gap:14px}.admin-sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:10px}.admin-sidebar-title{grid-column:1/-1}.admin-tab{padding:10px 8px;font-size:13px}.admin-tab-icon{width:20px}.admin-content .admin-layout{grid-template-columns:1fr}}
+    @media(max-width:760px){.admin-layout{grid-template-columns:1fr}}
+    @media(max-width:600px){header{padding:17px 20px}main{margin-top:18px;padding:0 12px 32px}.panel{padding:17px}.order-info{grid-template-columns:1fr}.toolbar select{width:100%}.admin-form{grid-template-columns:1fr}.admin-form .full{grid-column:auto}.product-row{align-items:flex-start;flex-direction:column}.product-actions{width:100%}.product-actions button{flex:1}.opening-hour-row{grid-template-columns:1fr 1fr}.opening-day{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>Gelabrê · Administração</h1><p>Gerencie o cardápio, os dados da loja e os pedidos.</p></div>
+    <div class="header-actions" id="header-actions" hidden>
+      <a href="/">Ver loja</a>
+      <button id="refresh-button" type="button">Atualizar</button>
+      <button id="logout-button" type="button">Sair</button>
+    </div>
+  </header>
+  <main>
+    <section class="panel" id="login-panel">
+      <h2>Acesso da loja</h2>
+      <p class="note">Entre com a senha administrativa configurada ao iniciar o servidor.</p>
+      <form id="login-form">
+        <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required></div>
+        <button type="submit">Entrar no painel</button>
+      </form>
+      <p class="error" id="login-error" role="alert"></p>
+    </section>
+    <section id="orders-panel" hidden>
+      <div class="admin-shell">
+        <nav class="admin-sidebar" aria-label="Seções do painel">
+          <h2 class="admin-sidebar-title">Menu administrativo</h2>
+          <button class="admin-tab" type="button" id="tab-orders" data-admin-tab="orders" aria-controls="section-orders" aria-selected="true"><span class="admin-tab-icon" aria-hidden="true">📋</span>Pedidos</button>
+          <button class="admin-tab" type="button" id="tab-products" data-admin-tab="products" aria-controls="section-products" aria-selected="false"><span class="admin-tab-icon" aria-hidden="true">🍧</span>Produtos</button>
+          <button class="admin-tab" type="button" id="tab-hours" data-admin-tab="hours" aria-controls="section-hours" aria-selected="false"><span class="admin-tab-icon" aria-hidden="true">🕒</span>Horário</button>
+          <button class="admin-tab" type="button" id="tab-delivery" data-admin-tab="delivery" aria-controls="section-delivery" aria-selected="false"><span class="admin-tab-icon" aria-hidden="true">🛵</span>Entrega</button>
+          <button class="admin-tab" type="button" id="tab-store" data-admin-tab="store" aria-controls="section-store" aria-selected="false"><span class="admin-tab-icon" aria-hidden="true">⚙️</span>Dados da loja</button>
+        </nav>
+        <div class="admin-content">
+          <section class="admin-section" id="section-orders" data-admin-section="orders" aria-labelledby="section-orders-title">
+            <div class="panel">
+              <div class="toolbar">
+                <h2 id="section-orders-title">Pedidos recentes</h2>
+                <div class="admin-actions">
+                  <label>Exibir
+                    <select id="status-filter">
+                      <option value="">Todos os status</option>
+                      <option value="RECEBIDO">Recebidos</option>
+                      <option value="CONFIRMADO">Confirmados</option>
+                      <option value="EM_PREPARO">Em preparo</option>
+                      <option value="SAIU_PARA_ENTREGA">Saiu para entrega</option>
+                      <option value="CONCLUIDO">Concluídos</option>
+                      <option value="CANCELADO">Cancelados</option>
+                    </select>
+                  </label>
+                  <button class="danger" id="delete-listed-orders-button" type="button" disabled>Excluir pedidos listados</button>
+                </div>
+              </div>
+              <p class="error" id="orders-error" role="alert"></p>
+              <div class="orders" id="orders" aria-live="polite"></div>
+            </div>
+          </section>
+          <section class="admin-section" id="section-products" data-admin-section="products" aria-labelledby="section-products-title" hidden>
+            <h2 class="admin-page-title" id="section-products-title">Produtos</h2>
+            <div class="admin-layout">
+              <section class="panel">
+                <h2 id="product-form-title">Adicionar geladinho</h2>
+                <form id="product-form">
+                  <div class="admin-form">
+                    <div class="field"><label for="product-name">Nome *</label><input id="product-name" required maxlength="150" placeholder="Ex.: Geladinho de morango"></div>
+                    <div class="field"><label for="product-price">Preço (R$) *</label><input id="product-price" type="number" min="0" step="0.01" required placeholder="5,00"></div>
+                    <div class="field"><label for="product-quantity">Quantidade disponível *</label><input id="product-quantity" type="number" min="0" max="1000000" step="1" required value="1"><small class="note">Ao chegar a zero, o geladinho some automaticamente da página do cliente.</small></div>
+                    <div class="field inline"><input id="product-visible" type="checkbox" checked><label for="product-visible">Mostrar na página do cliente</label></div>
+                    <div class="field full"><label for="product-description">Descrição</label><input id="product-description" maxlength="500" placeholder="Descreva o sabor"></div>
+                    <div class="field full"><label for="product-image">Foto</label><input id="product-image" type="file" accept="image/*"><small class="note" id="image-hint">Opcional. Uma nova foto substitui a foto atual.</small></div>
+                  </div>
+                  <div class="admin-actions">
+                    <button type="submit" id="save-product-button">Adicionar produto</button>
+                    <button class="secondary" type="button" id="cancel-edit-button" hidden>Cancelar edição</button>
+                  </div>
+                </form>
+                <p class="error" id="product-error" role="alert"></p>
+              </section>
+              <section class="panel">
+                <div class="toolbar"><h2>Produtos cadastrados</h2><button class="secondary" id="refresh-products-button" type="button">Atualizar lista</button></div>
+                <div class="product-list" id="product-list" aria-live="polite"></div>
+                <p class="note" id="product-sync-status" role="status"></p>
+                <div class="admin-actions">
+                  <button class="secondary" type="button" id="export-menu-button">Exportar cardápio JSON</button>
+                  <button class="danger" type="button" id="reset-menu-button">Restaurar exemplos</button>
+                </div>
+              </section>
+            </div>
+          </section>
+          <section class="admin-section" id="section-hours" data-admin-section="hours" aria-labelledby="opening-hours-title" hidden>
+            <div class="panel">
+              <h2 id="opening-hours-title">Horário de funcionamento</h2>
+              <p class="note">Defina os dias e horários em que a loja aceita pedidos. Os horários são interpretados no fuso de Brasília. Dias desmarcados ficam fechados; o servidor também bloqueia pedidos fora do horário.</p>
+              <form id="opening-hours-form">
+                <div class="opening-hours-list" id="opening-hours-fields"></div>
+                <button type="submit" id="save-opening-hours-button">Salvar horário de funcionamento</button>
+              </form>
+              <p class="error" id="opening-hours-error" role="alert"></p>
+              <p class="note" id="opening-hours-success" role="status"></p>
+            </div>
+          </section>
+          <section class="admin-section" id="section-delivery" data-admin-section="delivery" aria-labelledby="delivery-settings-title" hidden>
+            <div class="panel">
+              <h2 id="delivery-settings-title">Taxa de entrega</h2>
+              <p class="note">Configure aqui o valor cobrado nos pedidos ou ative a entrega grátis. Essa opção fica separada dos outros dados da loja.</p>
+              <form id="delivery-settings-form">
+                <div class="admin-form">
+                  <div class="field"><label for="delivery-fee">Valor da taxa (R$)</label><input id="delivery-fee" type="number" min="0" max="100000" step="0.01" value="0"><small class="note">Valor cobrado em cada pedido quando a entrega grátis estiver desativada.</small></div>
+                  <div class="field inline"><input id="free-delivery" type="checkbox"><label for="free-delivery">Oferecer entrega grátis</label></div>
+                </div>
+                <button type="submit" id="save-delivery-settings-button">Salvar taxa de entrega</button>
+              </form>
+              <p class="error" id="delivery-settings-error" role="alert"></p>
+              <p class="note" id="delivery-settings-success" role="status"></p>
+            </div>
+          </section>
+          <section class="admin-section" id="section-store" data-admin-section="store" aria-labelledby="section-store-title" hidden>
+            <div class="panel">
+              <h2 id="section-store-title">Dados da loja</h2>
+              <p class="note">Os dados são gravados no servidor e compartilhados com a página de compra deste site.</p>
+              <form id="settings-form">
+                <div class="field"><label for="pixkey">Chave Pix</label><input id="pixkey" maxlength="200" placeholder="Chave Pix da loja"></div>
+                <div class="field"><label for="merchant">Nome do recebedor Pix</label><input id="merchant" maxlength="100" placeholder="Nome conforme cadastro bancário"></div>
+                <div class="field"><label for="city">Cidade do recebedor</label><input id="city" maxlength="50" placeholder="Ex.: IRITUIA"></div>
+                <div class="field"><label for="pixdesc">Descrição do Pix (opcional)</label><input id="pixdesc" maxlength="72" placeholder="Ex.: Gelabrê Delivery"></div>
+                <div class="field"><label for="whatsapp">WhatsApp da loja</label><input id="whatsapp" inputmode="numeric" maxlength="30" placeholder="5591999999999"><small class="note">Inclua código do país (55), DDD e número. Exemplo de formato: 5591999999999. Somente números.</small></div>
+                <button type="submit">Salvar dados da loja</button>
+              </form>
+              <p class="error" id="settings-error" role="alert"></p>
+              <p class="note" id="settings-success" role="status"></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/admin.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gelabre-delivery
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.13.1
+      - key: HOST
+        value: 0.0.0.0
+      - key: GELABRE_ADMIN_PASSWORD
+        generateValue: true
+      - key: GELABRE_DB_PATH
+        value: /tmp/gelabre/orders.sqlite

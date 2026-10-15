@@ -1,0 +1,67 @@
+# Gelabrê Delivery — versão 2
+
+## O que esta versão inclui
+- Cardápio responsivo dedicado a geladinhos.
+- Busca, filtro por categoria e carrinho.
+- Cadastro de produtos, fotos, estoque e visibilidade no painel administrativo.
+- Navegação por abas laterais no painel, separando pedidos, produtos, horário, entrega e dados da loja.
+- Dados compartilhados da loja para Pix, nome/cidade do recebedor, WhatsApp e taxa de entrega (ou entrega grátis).
+- Horário semanal configurável no painel, exibido aos clientes e validado pelo servidor antes de registrar pedidos.
+- Geração de QR Code Pix estático (payload BR Code) no navegador.
+- Captura de localização mediante autorização do cliente.
+- Resumo do pedido enviado para o WhatsApp da loja.
+
+## Teste local
+1. Instale o Node.js 22.13 ou mais recente.
+2. Abra o PowerShell nesta pasta e inicie o backend:
+
+   ```powershell
+   $env:GELABRE_ADMIN_PASSWORD = "substitua-por-uma-senha-forte-com-12-caracteres"
+   npm start
+   ```
+
+   Troque o valor de exemplo por uma senha sua; ela não é salva nos arquivos do projeto.
+3. A página de compra para clientes fica em `http://127.0.0.1:3000`. O painel exclusivo da loja fica em `http://127.0.0.1:3000/admin` e pede a senha configurada acima. Para ver os produtos compartilhados, abra a loja pelo botão **Ver loja** do painel ou pelo endereço do servidor; abrir o arquivo HTML diretamente não carrega o catálogo do backend.
+4. No painel administrativo, use o menu lateral para alternar entre **Pedidos**, **Produtos**, **Horário**, **Entrega** e **Dados da loja**. Configure os dias e horários na seção **Horário** e salve. O horário usa o fuso de Brasília; dias desmarcados ficam fechados. A loja mostra a agenda aos clientes e não aceita pedidos fora do horário (o servidor também verifica isso ao registrar cada pedido). A agenda começa com todos os dias fechados até ser configurada. Um horário de fechamento anterior à abertura indica que a loja fecha no dia seguinte. Os pedidos são agrupados por dia, do mais recente para os anteriores; o filtro por status continua disponível. O botão **Excluir pedidos listados** apaga permanentemente todos os pedidos atualmente exibidos (respeitando o filtro selecionado); pedidos ainda não concluídos liberam o estoque reservado, enquanto pedidos concluídos ou cancelados não alteram o estoque. Configure a taxa na seção **Entrega** e salve no próprio botão dessa seção. Marque **Oferecer entrega grátis** para não cobrar a taxa, independentemente do valor configurado. A chave Pix, o nome/cidade do recebedor e o WhatsApp da loja (incluindo código do país e DDD, por exemplo `5591999999999`) ficam em **Dados da loja**. O cliente vê subtotal, taxa e total antes de enviar o pedido; o servidor calcula e registra esses valores. A lista de produtos mostra o catálogo salvo no servidor e pode ser atualizada pelo botão **Atualizar lista**. Na página do cliente, **Atualizar cardápio** busca as alterações imediatamente; sem isso, a loja sincroniza automaticamente a cada 15 segundos.
+5. Envie um pedido de teste. Com o WhatsApp da loja configurado, o pedido é gravado no painel e a página abre uma conversa com o resumo preenchido. O cliente ainda precisa tocar em **Enviar** no WhatsApp; o navegador não pode enviar mensagens por conta própria.
+
+O backend usa apenas módulos nativos do Node.js. Os pedidos ficam no arquivo `data/orders.sqlite` e permanecem salvos quando o servidor é reiniciado. O painel exige a senha definida em `GELABRE_ADMIN_PASSWORD`; a sessão expira após 12 horas. Por padrão, o servidor só aceita conexões deste computador (`127.0.0.1`).
+
+## Demonstração gratuita no Render
+
+O arquivo `render.yaml` configura um serviço Node gratuito para demonstração, define o host público, a verificação de saúde e gera uma senha administrativa aleatória. Para publicar:
+1. Envie o projeto para um repositório GitHub privado. A pasta `data/` já está no `.gitignore`; não publique o banco de dados.
+2. No Render, crie um **Blueprint** e conecte o repositório. O Render lerá o `render.yaml` e criará o serviço.
+3. Quando a implantação terminar, abra o domínio `onrender.com` indicado pelo Render. Consulte a variável `GELABRE_ADMIN_PASSWORD` nas configurações do serviço para obter a senha do painel (`/admin`) e guarde-a em local seguro.
+4. Faça um teste com dados fictícios. Não use esta demonstração para pedidos reais nem para guardar informações importantes.
+
+**Limitações do plano gratuito:** o serviço pode suspender após inatividade e demorar para responder ao primeiro acesso. O banco SQLite deste Blueprint fica em `/tmp`, que não é armazenamento persistente: pedidos, produtos e configurações podem ser perdidos quando o serviço reiniciar ou for publicado novamente. Para uso contínuo, migre o banco para armazenamento persistente/gerenciado e configure backups antes de aceitar pedidos reais. O Render pode alterar os limites e as condições do plano gratuito.
+
+Para executar os testes automatizados, use `npm test`.
+
+A geolocalização e a partilha podem exigir HTTPS em navegadores modernos. O QR Code depende da biblioteca QRCode carregada por CDN.
+
+## Importante: o que falta para produção
+O backend registra pedidos e permite atualizar o estado entre recebido, confirmado, em preparo, saiu para entrega, concluído e cancelado. Produtos, preços, fotos, quantidades, visibilidade e configurações da loja são salvos no SQLite do servidor e compartilhados com os clientes. Cada pedido desconta o estoque de forma atômica; o servidor rejeita pedidos sem estoque, produtos ocultos ou quantidades indisponíveis. Produtos com estoque zero deixam de aparecer no cardápio. Ao cancelar um pedido, os itens existentes voltam ao estoque; ao reativar um pedido cancelado, o servidor confere e reserva o estoque novamente. Restaurar os produtos de exemplo cria novos registros, para que pedidos antigos não alterem o estoque do cardápio restaurado. O backend local não confirma pagamentos.
+
+**Este backend está preparado para desenvolvimento e uso local, não para exposição direta à internet ou operação comercial sem preparação.** A página de compra (`/`) não mostra os controles de administração; o painel da loja fica em `/admin` e exige senha. Antes da publicação, configure HTTPS, hospedagem apropriada, política de privacidade, backups e monitoração; use um catálogo de produtos e preços mantido no servidor e autenticação apropriada para o ambiente publicado. Nunca exponha a senha administrativa nem o banco de dados.
+
+Para uma publicação de produção, recomendamos:
+1. **Hospedagem HTTPS:** publicar o front-end em domínio próprio ou subdomínio.
+2. **Banco de dados e armazenamento de imagens:** usar Supabase, Firebase ou backend próprio para que o cardápio seja compartilhado entre dispositivos.
+3. **Autenticação administrativa:** proteger cadastro de produtos, preços, chave Pix e dados da loja com login e permissões apropriados ao ambiente publicado.
+4. **Pedidos:** o protótipo já grava pedidos localmente e oferece um painel administrativo; para publicação, revisar a infraestrutura e a proteção dos dados.
+5. **Pix em produção:** validar o payload e a chave com o banco/provedor de pagamento. Para confirmação automática, integrar um PSP/API Pix com credenciais mantidas apenas no servidor e webhooks; nunca colocar segredos no HTML. O QR Code desta demonstração é estático e não confirma pagamento.
+6. **Entrega:** definir área atendida, taxa de entrega, pedido mínimo, horários e política para endereço/localização.
+7. **Privacidade e segurança:** publicar política de privacidade, coletar apenas os dados necessários, limitar o acesso aos pedidos e definir retenção dos dados. A localização só deve ser capturada após consentimento.
+8. **Operação:** configurar domínio, backups, monitoramento, testes em celular, validação dos pedidos e rotina de suporte.
+
+## Publicar uma demonstração
+É possível usar hospedagem estática HTTPS (por exemplo, Netlify, Vercel ou GitHub Pages) para mostrar o protótipo. Isso **não** resolve o banco compartilhado, login administrativo nem confirmação de pagamento. Antes de aceitar pedidos reais, implemente os itens acima.
+
+## Dados que a loja precisa definir
+- Nome comercial exato do recebedor Pix e cidade cadastrada no banco.
+- Chave Pix e confirmação de que o QR gerado é aceito pelo banco.
+- Número oficial do WhatsApp (DDI + DDD + número).
+- Fotos, sabores/tamanhos, preços e disponibilidade.
+- Área e taxa de entrega, horário de funcionamento e política de cancelamento.
